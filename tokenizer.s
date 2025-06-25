@@ -1,11 +1,25 @@
 .section .rodata
-  
-  .extern TWO_LEN_MNEMONIC
-  .extern THREE_LEN_MNEMONIC
 
-  .set MNEMONIC_TYPE, 1
-  .set REGISTER_TYPE, 2
-  .set NONE_TYPE, 3
+# Mnemonics tables
+.extern TWO_LEN_MNEMONIC
+.extern THREE_LEN_MNEMONIC
+
+# Registers tables
+.extern TWO_LEN_64_REG
+.extern THREE_LEN_64_REG
+
+.extern THREE_LEN_32_REG
+.extern FOUR_LEN_32_REG
+
+.extern TWO_LEN_8_REG
+.extern THREE_LEN_8_REG
+.extern FOUR_LEN_8_REG
+
+# Classification aliases
+
+.set MNEMONIC_TYPE, 1
+.set REGISTER_TYPE, 2
+.set NONE_TYPE, 3
 
 
 FILE_NAME:
@@ -167,12 +181,33 @@ two_len_token:
   jmp is_none
 
 three_len_token:
-  movq $THREE_LEN_MNEMONIC, %r8
+  movq $THREE_LEN_MNEMONIC, %r8        # check if it is a mnemonic
   movb (%r8), %r9b
 
   call check_token
   cmpq $1, %r10
   je is_a_mnemonic
+
+  movq $THREE_LEN_64_REG, %r8          # check if it is a 64 bit register
+  movb (%r8), %r9b
+
+  call check_token
+  cmpq $1, %r10
+  je is_a_64_register
+
+  movq $THREE_LEN_32_REG, %r8          # check if it is a 32 bit register
+  movb (%r8), %r9b
+
+  call check_token
+  cmpq $1, %r10
+  je is_a_32_register
+
+  movq $THREE_LEN_8_REG, %r8           # check if it is an 8 bit register
+  movb (%r8), %r9b
+
+  call check_token
+  cmpq $1, %r10
+  je is_an_8_register
 
   jmp is_none
 
@@ -226,15 +261,31 @@ no_token_match:
 is_a_mnemonic:
   incq %r13                            # increase the type-token counter
 
-  movq $MNEMONIC_TYPE, %r10             # recycle r10 to use it as the token_type buffer
+  movq $MNEMONIC_TYPE, %r10            # recycle r10 to use it as the token_type buffer
                                        # TO IMPLEMENT: CALL THE PARSER TO LET IT KNOW A TOKEN WAS JUST FINISHED
   jmp clean_token_registers
 
-is_a_register:
+  # TO IMPLEMENT: GOTTA CREATE A SIMPLER WAY TO assign REGISTER TYPE TO REGISTERS
+
+is_a_64_register:
   incq %r13                            # increase the type-token token counter
 
-  movq $REGISTER_TYPE, %r10             # reuse r10 as the token_type buffer
+  movq $REGISTER_TYPE, %r10            # reuse r10 as the token_type buffer. GOTTA CHANGE THIS FOR SPECIFIC REGISTER SIZE
                                        # TO IMPLEMENT: CALL THE PARSER TO LET IT KNOW A TOKEN WAS JUST FINISHED
+  jmp clean_token_registers
+
+is_a_32_register:
+  incq %r13
+
+  movq $REGISTER_TYPE, %r10            # GOTTA CHANGE THIS FOR SPECIFIC REGISTER SIZE
+
+  jmp clean_token_registers
+
+is_an_8_register:
+  incq %r13
+
+  movq $REGISTER_TYPE, %r10            # GOTTA CHANGE THIS FOR SPECIFIC REGISTER SIZE
+
   jmp clean_token_registers
 
 is_none:
