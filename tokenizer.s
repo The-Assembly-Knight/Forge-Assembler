@@ -54,9 +54,16 @@ end_reading_file:
   jmp start_tokenizing
 
 start_tokenizing:                      # TEMPORAL GOTTA FIND A BETTER NAME FOR IT BECAUSE IT WILL BE USED EVERYTIME A LINE ENDS
+  xorq %r11, %r11                      # TEST
+  jmp clean_line_registers
+
+clean_line_registers:
+  xorq %r14, %r14                      # will hold the amount of tokens of current line
+  jmp clean_token_registers
+
+clean_token_registers:
   xorq %rcx, %rcx                      # will hold the amount of char of the current token
   xorq %rdx, %rdx                      # will hold the amount of byte-matches of the current token
-  xorq %r14, %r14                      # will hold the amount of tokens of current line
 
   jmp scan_byte
 
@@ -67,9 +74,12 @@ scan_byte:
 
 token_has_not_started:
   cmpb $10, %al                        # if current char is \n check if line had a token
-  je check_line
+  je close_file                              # exit TEMPORAL
 
-  cmpb $32, %al                        # if current char is a space ' ' ignore it
+  cmpb $9, %al                         # if current char is \t skip it
+  je next_byte
+
+  cmpb $32, %al                        # if current char is a space skip it
   je next_byte
 
   cmpb $0, %al                         # if current char is the EOF end tokenizing
@@ -79,6 +89,9 @@ token_has_not_started:
 
 token_already_started:
   cmpb $10, %al                        # if current char is new line treat it as a delimiter
+  je end_token
+
+  cmpb $9, %al                         # if current char is a \t treat it as a delimiter
   je end_token
 
   cmpb $32, %al                        # if current char is a space ' ' treat it as a delimiter
@@ -95,11 +108,11 @@ next_byte:
   
   jmp scan_byte
 
-
 check_line:
   cmpq $0, %r14                        # check if there are not any tokens in the current line
   je next_byte
-  jne end_instruction
+  jne error_reading_from_file          # TEMPORAL
+#  jne end_instruction
 
 add_to_token:
   movq $token_buffer, %rdi
@@ -117,76 +130,69 @@ end_token:
   jmp classify_token 
 
 classify_token:
-  cmpq $3, %rcx
+  cmpq $3, %rcx                        # if token_len is 3 then it is a three_len_token otherwise it is not an instruction
+  leaq THREE_LEN_MNEMONIC(%rip), %r8
+  movb (%r8), %r9b
   je three_len_token
 
-  jmp error_reading_from_file          # TEMPORAL
+  jmp not_an_instruction
 
-  # GOTTA ADD MORE IFs BUT IF IT ITS LEN IS MORE THAN 4 IS NEITHER A MNEMONIC NOR A REGISTER SO EITHER IMMEDIATE OR MEMORY ACCESS,
-  # GOTTA WORK ON THAT BUT FIRST IM DOING A BASIC VERSION.
 
 three_len_token:
-  xorq %r13, %r13                       # take %r13 as a ZF of it was clasified or not
-  movq $THREE_LEN_MNEMONIC, %r8         # recycle rdi since it'll be reseted back to its original value after the token clasification
-  movb (%r8), %r9b
+  movq $token_buffer, %rdi
+  addq %rdx, %rdi
 
-  # Test
-  xorq %r10, %r10
-  xorq %r11, %r11
-
-check_byte:
-  cmpq %rcx, %rdx                      # if the amount of byte-matches is = to the amount of bytes then the tokens match
-  je token_match
-
-  cmpb $0, %r9b                        # if reached the end of the list
+  cmpb $0, %r9b
   je no_token_match
 
-  movq $token_buffer, %rdi
-  addq %rdx, %rdi                      # add byte matches as offset
-
-  cmpb %r9b, (%rdi)
+  cmpb (%rdi), %r9b
   je byte_match
-  jne no_byte_match
+
+  jmp no_byte_match
 
 byte_match:
-  incq %rdx                            # increase byte-matches counter
+  incq %rdx                            # increase byte-matches count
 
-  incq %r8
-  movb (%r8), %r9b                     # go to the next byte in the list
-  
-  jmp check_byte
+  incq %r8                             # go to the next byte in the list
+  movb (%r8), %r9b                     # and save it in r9b
+
+  cmpq %rcx, %rdx
+  je token_match
+
+  jmp three_len_token
 
 no_byte_match:
-  cmpq %rcx, %rdx                     # move 1 byte in the list until the amount of token_len and token_byte_matches are equal
+  incq %rdx                            # increase byte-matches to count the amount of bytes left until the end of current list item
+  
+  incq %r8
+  movb (%r8), %r9b
+
+  cmpq %rcx, %rdx
   je reset_byte_matches
-
-  incq %r8                            # point to next byte in the list
-  movb (%r8), %r9b                    # save the value of the current byte in the list
-
-  incq %rdx                           # increase token_byte_matches
 
   jmp no_byte_match
 
 reset_byte_matches:
   xorq %rdx, %rdx
-  jmp check_byte
+  jmp three_len_token
+
 
 token_match:
-  incq %r11                            # it is just a test, if it works then r11 has to be 1 (it worked btw)
-  jmp exit
+  incq %r12                            # increase the amount of instruction tokens for testing purposes
+  jmp clean_token_registers
 
 no_token_match:
-  incq %r10                            # it is also another test if it worked then r10 was supposed to be 0 (again, it worked)
-  jmp exit
-
-end_instruction:
-# IT NEEDS TO TELL THE PARSER THAT THE INSTRUCTION LINE IS READY TO BE SEND TO THE ENCODER
-jmp start_tokenizing
+  incq %r13                            # increase the amount of non_instruction tokens for testing purposes
+  jmp clean_token_registers
 
 
 end_tokenizing:
-# send a signal to the parser telling it that there are not more instructions
-  nop
+  jmp close_file
+
+
+not_an_instruction:
+  jmp no_token_match
+
 
 close_file:
   movq $3, %rax                        # close syscall
