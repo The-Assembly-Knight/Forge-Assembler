@@ -3,6 +3,11 @@
   .extern TWO_LEN_MNEMONIC
   .extern THREE_LEN_MNEMONIC
 
+  .set MNEMONIC_TYPE, 1
+  .set REGISTER_TYPE, 2
+  .set NONE_TYPE, 3
+
+
 FILE_NAME:
   .asciz "test_file"
 
@@ -141,20 +146,35 @@ end_token:
   jmp classify_token 
 
 classify_token:
+  xorq %r10, %r10                      # will be used as the ZF of check_token; 0 = no_token_match and 1 = token_match
 
   cmpq $2, %rcx
-  leaq TWO_LEN_MNEMONIC(%rip), %r8
-  movb (%r8), %r9b
-  je check_token
+  je two_len_token
 
   cmpq $3, %rcx                        # if token_len is 3 then it is a three_len_token otherwise it is not an instruction
-  leaq THREE_LEN_MNEMONIC(%rip), %r8
+  je three_len_token
+
+  jmp is_none                          # TEMPORAL
+
+two_len_token:
+  movq $TWO_LEN_MNEMONIC, %r8
   movb (%r8), %r9b
-  je check_token
 
-  jmp not_an_instruction
+  call check_token                     # check if it is a mnemonic
+  cmpq $1, %r10                        # if is a mnemonic classify it as so
+  je is_a_mnemonic
 
+  jmp is_none
 
+three_len_token:
+  movq $THREE_LEN_MNEMONIC, %r8
+  movb (%r8), %r9b
+
+  call check_token
+  cmpq $1, %r10
+  je is_a_mnemonic
+
+  jmp is_none
 
 check_token:
   movq $token_buffer, %rdi
@@ -196,24 +216,37 @@ reset_byte_matches:
 
 
 token_match:
-  incq %r12                            # increase the amount of instruction tokens for testing purposes
-  jmp clean_token_registers
+  movq $1, %r10                        # set token_match flag to true
+  ret
 
 no_token_match:
-  incq %r13                            # increase the amount of non_instruction tokens for testing purposes
+  movq $0, %r10                        # set token_match flag to false
+  ret
+
+is_a_mnemonic:
+  incq %r13                            # increase the type-token counter
+
+  movq $MNEMONIC_TYPE, %r10             # recycle r10 to use it as the token_type buffer
+                                       # TO IMPLEMENT: CALL THE PARSER TO LET IT KNOW A TOKEN WAS JUST FINISHED
   jmp clean_token_registers
 
+is_a_register:
+  incq %r13                            # increase the type-token token counter
+
+  movq $REGISTER_TYPE, %r10             # reuse r10 as the token_type buffer
+                                       # TO IMPLEMENT: CALL THE PARSER TO LET IT KNOW A TOKEN WAS JUST FINISHED
+  jmp clean_token_registers
+
+is_none:
+  incq %r12                            # increase the no-type token counter
+  
+  jmp clean_token_registers
 
 end_tokenizing:
   jmp close_file
 
 
-not_an_instruction:
-  jmp no_token_match
-
 end_instruction:
-  incq %r10                            # USE r10 TEMPORALLY FOR DEBUGGING PURPOSES (CHECK THE AMOUNT OF TIMES IT WAS THE END OF AN INSTRUCTION)
-
                                        # TO IMPLEMENT: SEND SIGNAL TO THE PARSER TELLING IT THE LINE IS READY TO BE ANALYZED
   jmp clean_line_registers             # tokenize next line
 
