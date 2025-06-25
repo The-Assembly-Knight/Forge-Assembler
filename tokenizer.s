@@ -1,12 +1,9 @@
 .section .rodata
+  
+  .extern THREE_LEN_MNEMONIC
 
 FILE_NAME:
   .asciz "test_file"
-
-THREE_LEN_MNEMONIC: # GOTTA PUT THIS IN ITS OWN FILE
-  .ascii "mov"
-  .ascii "jmp"
-  .asciz ""
 
 .section .bss
 
@@ -53,8 +50,7 @@ end_reading_file:
 
   jmp start_tokenizing
 
-start_tokenizing:                      # TEMPORAL GOTTA FIND A BETTER NAME FOR IT BECAUSE IT WILL BE USED EVERYTIME A LINE ENDS
-  xorq %r11, %r11                      # TEST
+start_tokenizing:
   jmp clean_line_registers
 
 clean_line_registers:
@@ -144,12 +140,14 @@ end_token:
   jmp classify_token 
 
 classify_token:
+
   cmpq $3, %rcx                        # if token_len is 3 then it is a three_len_token otherwise it is not an instruction
   leaq THREE_LEN_MNEMONIC(%rip), %r8
   movb (%r8), %r9b
   je three_len_token
 
   jmp not_an_instruction
+
 
 
 three_len_token:
