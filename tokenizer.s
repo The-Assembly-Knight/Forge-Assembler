@@ -1,5 +1,6 @@
 .section .rodata
   
+  .extern TWO_LEN_MNEMONIC
   .extern THREE_LEN_MNEMONIC
 
 FILE_NAME:
@@ -141,16 +142,21 @@ end_token:
 
 classify_token:
 
+  cmpq $2, %rcx
+  leaq TWO_LEN_MNEMONIC(%rip), %r8
+  movb (%r8), %r9b
+  je check_token
+
   cmpq $3, %rcx                        # if token_len is 3 then it is a three_len_token otherwise it is not an instruction
   leaq THREE_LEN_MNEMONIC(%rip), %r8
   movb (%r8), %r9b
-  je three_len_token
+  je check_token
 
   jmp not_an_instruction
 
 
 
-three_len_token:
+check_token:
   movq $token_buffer, %rdi
   addq %rdx, %rdi
 
@@ -171,7 +177,7 @@ byte_match:
   cmpq %rcx, %rdx
   je token_match
 
-  jmp three_len_token
+  jmp check_token
 
 no_byte_match:
   incq %rdx                            # increase byte-matches to count the amount of bytes left until the end of current list item
@@ -186,7 +192,7 @@ no_byte_match:
 
 reset_byte_matches:
   xorq %rdx, %rdx
-  jmp three_len_token
+  jmp check_token
 
 
 token_match:
