@@ -74,7 +74,7 @@ scan_byte:
 
 token_has_not_started:
   cmpb $10, %al                        # if current char is \n check if line had a token
-  je close_file                              # exit TEMPORAL
+  je check_line                        # exit TEMPORAL
 
   cmpb $9, %al                         # if current char is \t skip it
   je next_byte
@@ -110,9 +110,8 @@ next_byte:
 
 check_line:
   cmpq $0, %r14                        # check if there are not any tokens in the current line
-  je next_byte
-  jne error_reading_from_file          # TEMPORAL
-#  jne end_instruction
+  je next_byte                         # skip new line char
+  jne end_instruction                  # send signal to the parser if reached the end of a line with tokens
 
 add_to_token:
   movq $token_buffer, %rdi
@@ -192,6 +191,10 @@ end_tokenizing:
 
 not_an_instruction:
   jmp no_token_match
+
+end_instruction:
+                                       # TO IMPLEMENT: SEND SIGNAL TO THE PARSER TELLING IT THE LINE IS READY TO BE ANALYZED
+  jmp clean_line_registers             # tokenize next line
 
 
 close_file:
