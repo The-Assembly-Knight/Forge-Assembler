@@ -168,15 +168,32 @@ classify_token:
   cmpq $3, %rcx                        # if token_len is 3 then it is a three_len_token otherwise it is not an instruction
   je three_len_token
 
+  cmpq $4, %rcx
+  je four_len_token
+
   jmp is_none                          # TEMPORAL
 
 two_len_token:
-  movq $TWO_LEN_MNEMONIC, %r8
+  movq $TWO_LEN_MNEMONIC, %r8          # check if it is a mnemonic
   movb (%r8), %r9b
 
-  call check_token                     # check if it is a mnemonic
+  call check_token
   cmpq $1, %r10                        # if is a mnemonic classify it as so
   je is_a_mnemonic
+
+  movq $TWO_LEN_64_REG, %r8            # check if it is a 64 bit register
+  movb (%r8), %r9b
+
+  call check_token
+  cmpq $1, %r10
+  je is_a_64_register
+
+  movq $TWO_LEN_8_REG, %r8             # check if it is an 8bit register
+  movb (%r8), %r9b
+
+  call check_token
+  cmpq $1, %r10
+  je is_an_8_register
 
   jmp is_none
 
@@ -203,6 +220,23 @@ three_len_token:
   je is_a_32_register
 
   movq $THREE_LEN_8_REG, %r8           # check if it is an 8 bit register
+  movb (%r8), %r9b
+
+  call check_token
+  cmpq $1, %r10
+  je is_an_8_register
+
+  jmp is_none
+
+four_len_token:
+  movq $FOUR_LEN_32_REG, %r8           # check if it is a 32 bit register
+  movb (%r8), %r9b
+
+  call check_token
+  cmpq $1, %r10
+  je is_a_32_register
+
+  movq $FOUR_LEN_8_REG, %r8            # check if it is an 8 bit register
   movb (%r8), %r9b
 
   call check_token
