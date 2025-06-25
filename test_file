@@ -1,4 +1,4 @@
-mov rax rax
-
+mov rax rax       ; move  rax to rax
+; this is a comment
 
 mov rax

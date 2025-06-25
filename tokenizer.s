@@ -82,6 +82,9 @@ token_has_not_started:
   cmpb $32, %al                        # if current char is a space skip it
   je next_byte
 
+  cmpb $59, %al                        # if current char is the start of a comment (;) skip the rest of the line
+  je next_line
+
   cmpb $0, %al                         # if current char is the EOF end tokenizing
   je end_tokenizing
 
@@ -97,6 +100,9 @@ token_already_started:
   cmpb $32, %al                        # if current char is a space ' ' treat it as a delimiter
   je end_token
 
+  cmpb $59, %al                        # if current char is the start of a comment (;) use it as a delimiter
+  je end_token
+
   cmpb $0, %al                         # if current char is EOF treat it as a delimiter
   je end_token
 
@@ -107,6 +113,15 @@ next_byte:
   movb (%rsi), %al                     # save the current char in al
   
   jmp scan_byte
+
+next_line:
+  incq %rsi
+  movb (%rsi), %al
+
+  cmpb $10, %al                        # keep increasing value of the pointer until reached a \n
+  je check_line                        # when reached \n check if line had at least a token before the comment start
+
+  jmp next_line
 
 check_line:
   cmpq $0, %r14                        # check if there are not any tokens in the current line
@@ -193,6 +208,8 @@ not_an_instruction:
   jmp no_token_match
 
 end_instruction:
+  incq %r10                            # USE r10 TEMPORALLY FOR DEBUGGING PURPOSES (CHECK THE AMOUNT OF TIMES IT WAS THE END OF AN INSTRUCTION)
+
                                        # TO IMPLEMENT: SEND SIGNAL TO THE PARSER TELLING IT THE LINE IS READY TO BE ANALYZED
   jmp clean_line_registers             # tokenize next line
 
