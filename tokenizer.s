@@ -18,8 +18,12 @@
 # Classification aliases
 
 .set MNEMONIC_TYPE, 1
-.set REGISTER_TYPE, 2
-.set NONE_TYPE, 3
+
+.set REG_64_BIT, 3
+.set REG_32_BIT, 2
+.set REG_8_BIT, 4
+
+.set NONE_TYPE, 5
 
 
 FILE_NAME:
@@ -90,7 +94,7 @@ scan_byte:
 
 token_has_not_started:
   cmpb $10, %al                        # if current char is \n check if line had a token
-  je check_line                        # exit TEMPORAL
+  je check_line
 
   cmpb $9, %al                         # if current char is \t skip it
   je next_byte
@@ -293,33 +297,25 @@ no_token_match:
   ret
 
 is_a_mnemonic:
-  incq %r13                            # increase the type-token counter
-
   movq $MNEMONIC_TYPE, %r10            # recycle r10 to use it as the token_type buffer
                                        # TO IMPLEMENT: CALL THE PARSER TO LET IT KNOW A TOKEN WAS JUST FINISHED
-  jmp clean_token_registers
-
-  # TO IMPLEMENT: GOTTA CREATE A SIMPLER WAY TO assign REGISTER TYPE TO REGISTERS
+  jmp add_type_and_continue_tokenizing
 
 is_a_64_register:
-  incq %r13                            # increase the type-token token counter
-
-  movq $REGISTER_TYPE, %r10            # reuse r10 as the token_type buffer. GOTTA CHANGE THIS FOR SPECIFIC REGISTER SIZE
+  movq $REG_64_BIT, %r10               # reuse r10 as the token_type buffer. GOTTA CHANGE THIS FOR SPECIFIC REGISTER SIZE
                                        # TO IMPLEMENT: CALL THE PARSER TO LET IT KNOW A TOKEN WAS JUST FINISHED
-  jmp clean_token_registers
+  jmp add_type_and_continue_tokenizing
 
 is_a_32_register:
-  incq %r13
-
-  movq $REGISTER_TYPE, %r10            # GOTTA CHANGE THIS FOR SPECIFIC REGISTER SIZE
-
-  jmp clean_token_registers
+  movq $REG_32_BIT, %r10
+  jmp add_type_and_continue_tokenizing
 
 is_an_8_register:
+  movq $REG_8_BIT, %r10
+  jmp add_type_and_continue_tokenizing
+
+add_type_and_continue_tokenizing:
   incq %r13
-
-  movq $REGISTER_TYPE, %r10            # GOTTA CHANGE THIS FOR SPECIFIC REGISTER SIZE
-
   jmp clean_token_registers
 
 is_none:
