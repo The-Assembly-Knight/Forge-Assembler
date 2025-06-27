@@ -1,5 +1,8 @@
 .extern classify_token
 
+.globl token_buffer
+.globl clean_token_registers
+
 .section .rodata
 
 FILE_NAME:
