@@ -1,13 +1,5 @@
 .file "exit.s"
 
-.section .rodata
-
-  .extern EXIT_SYSCALL
-  .extern ERROR
-  .extern NO_ERROR
-
-.section .text
-
 .macro GLOBL_FUNC val                  # declare a macro for global functions
   .globl \val
   .type \val, @function
@@ -19,11 +11,18 @@
   syscall
 .endm
 
+.section .rodata
+
+  .extern EXIT_SYSCALL
+  .extern ERROR
+  .extern NO_ERROR
+
+.section .text
 
 GLOBL_FUNC exit_successfully
 exit_successfully:
   EXIT_SYSCALL NO_ERROR
 
-GLOBL_FUNC error_exit
-error_exit:
+GLOBL_FUNC exit_unsuccessfully
+exit_unsuccessfully:
   EXIT_SYSCALL ERROR
