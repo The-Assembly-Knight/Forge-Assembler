@@ -4,3 +4,5 @@ mov rax rax       ; move  rax to rax
 or rax rax
 al
 r15d
+
+1

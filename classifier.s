@@ -15,6 +15,12 @@
 .extern THREE_LEN_8_REG
 .extern FOUR_LEN_8_REG
 
+# Numbers tables
+
+.extern DEC_NUMBERS
+.extern HEX_NUMBERS
+
+
 # Classification aliases
 
 .set MNEMONIC_TYPE, 1
@@ -37,7 +43,7 @@ classify_token:
   cmpq $4, %rcx
   je four_len_token
 
-  jmp not_mnemonic_nor_reg
+  jmp is_none
 
 two_len_token:
   movq $TWO_LEN_MNEMONIC, %r8          # check if it is a mnemonic
@@ -111,13 +117,6 @@ four_len_token:
 
   jmp is_none
 
-not_mnemonic_nor_reg:
-
-
-check_if_number:
-
-
-
 check_token:
   movq $token_buffer, %rdi
   addq %rdx, %rdi
@@ -156,7 +155,6 @@ reset_byte_matches:
   xorq %rdx, %rdx
   jmp check_token
 
-
 token_match:
   movq $1, %r10                        # set token_match flag to true
   ret
@@ -186,6 +184,7 @@ is_an_8_register:
 add_type_and_continue_tokenizing:
   incq %r13
   jmp clean_token_registers
+
 
 is_none:
   incq %r12                            # increase the no-type token counter 
