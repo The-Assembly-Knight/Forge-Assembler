@@ -3,15 +3,7 @@
 .globl token_buffer
 .globl clean_token_registers
 
-.section .rodata
-
-FILE_NAME:
-  .asciz "test_file"
-
 .section .bss
-
-input_buffer:
-  .skip 65536
 
 token_buffer:
   .skip 32
