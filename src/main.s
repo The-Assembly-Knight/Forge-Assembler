@@ -1,33 +1,47 @@
 .file "main.s"
 
-.macro CHECK_EXIT_CODE                 # goal: exit if error code was returned by callee
-  cmpq $ERROR, %rax                    # if exit code is an error.
-  je error_exit                        # exit the program immediately with a 1 exit code.
+
+.extern open_file
+.extern close_file
+.extern read_from_file
+
+.extern NO_ERROR
+.extern ERROR
+.extern EMPTY_FILE
+
+.extern exit_successfully
+.extern exit_unsuccessfully
+
+.macro CHECK_EXIT_CODE label
+  cmpq $NO_ERROR, %rax                 # if return code isnt NO_ERROR, redirect it to label (where the error is gonna be treated)
+  jne \label
 .endm
 
 .section .rodata
-
-  .extern open_file
-  .extern close_file
-
-  .extern ERROR
-
-  .extern exit_successfully
-  .extern exit_unsuccessfully
-
-
 .section .text
 
 .globl _start
 
 _start:
   call open_file
-  CHECK_EXIT_CODE
+  CHECK_EXIT_CODE error_exit
+ 
+  call read_from_file
+  CHECK_EXIT_CODE error_reading_from_file 
 
   call close_file
-  CHECK_EXIT_CODE
+  CHECK_EXIT_CODE error_exit
+
+
 
   jmp exit
+
+error_reading_from_file:
+  cmpq $EMPTY_FILE, %rax
+  je exit
+
+  jmp error_exit
+
 
 exit:
   call exit_successfully

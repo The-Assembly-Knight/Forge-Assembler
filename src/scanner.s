@@ -13,15 +13,6 @@ token_buffer:
 
 _start:
 
-open_file:
-  movq $2, %rax                        # open syscall
-  movq $FILE_NAME, %rdi                # open file with the name FILE_NAME
-  movq $0, %rsi
-
-  syscall
-
-  movq %rax, %r15                      # save file descriptor
-
 reading_file:
   movq $0, %rax                        # read syscall
   movq %r15, %rdi                      # reading from file descriptor

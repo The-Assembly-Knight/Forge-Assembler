@@ -11,7 +11,7 @@
   .type \name, @function
 .endm
 
-.macro GLOBL_OBJ name                  # declare a global object, including its debugging symbols
+.macro globl_obj name                  # declare a global object, including its debugging symbols
   .globl \name
   .type \name, @object
 .endm
@@ -29,10 +29,6 @@ FILE_NAME:
 GLOBL_OBJ FILE_DESCRIPTOR
 FILE_DESCRIPTOR:
   .quad 0
-
-GLOBL_OBJ input_buffer
-input_buffer:
-  .skip 65536
 
 .section .text
 
