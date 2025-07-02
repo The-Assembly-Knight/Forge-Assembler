@@ -20,7 +20,7 @@
 
 GLOBL_FUNC close_file
 close_file:
-  movq $CLOSE_SYSCALL, %rax
+  movq CLOSE_SYSCALL(%rip), %rax
   movq FILE_DESCRIPTOR(%rip), %rdi     # pass file descriptor value to close said fd
   syscall
 
@@ -30,9 +30,9 @@ close_file:
   jmp successfully_closed
 
 successfully_closed:
-  RET_CODE $NO_ERROR                   # return to main.s with a 0 error code
+  RET_CODE NO_ERROR(%rip)              # return to main.s with a 0 error code
   ret
 
 no_successfully_closed:
-  RET_CODE $ERROR                      # return to main.s with a 1 error code
+  RET_CODE ERROR(%rip)                 # return to main.s with a 1 error code
   ret

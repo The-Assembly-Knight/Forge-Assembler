@@ -11,7 +11,7 @@
   .type \name, @function
 .endm
 
-.macro globl_obj name                  # declare a global object, including its debugging symbols
+.macro GLOBL_OBJ name                  # declare a global object, including its debugging symbols
   .globl \name
   .type \name, @object
 .endm
@@ -34,9 +34,9 @@ FILE_DESCRIPTOR:
 
 GLOBL_FUNC open_file
 open_file:
-  movq $OPEN_SYSCALL, %rax
+  movq OPEN_SYSCALL(%rip), %rax
   leaq FILE_NAME(%rip), %rdi
-  movq $NO_FLAGS, %rsi
+  movq NO_FLAGS(%rip), %rsi
 
   syscall
 
@@ -47,9 +47,9 @@ open_file:
 
 successfully_opened:
   movq %rax, FILE_DESCRIPTOR(%rip)     # move file descriptor into file_d
-  RET_CODE $NO_ERROR                   # return to main.s with a 0 error code
+  RET_CODE NO_ERROR(%rip)              # return to main.s with a 0 error code
   ret
 
 no_successfully_opened:
-  RET_CODE $ERROR                      # return to main.s with a 1 error code
+  RET_CODE ERROR(%rip)                 # return to main.s with a 1 error code
   ret

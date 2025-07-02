@@ -1,12 +1,15 @@
 .file "defs.s"
 
-.section .rodata
-
 .macro SET_GLOBL_DEF name, val
   .globl \name
-  .set \name, \val
+
+  .type \name, @object
+ 
+  \name: 
+  .quad \val
 .endm
 
+.section .rodata
 
 SET_GLOBL_DEF READ_SYSCALL , 0
 SET_GLOBL_DEF WRITE_SYSCALL, 1
@@ -20,3 +23,11 @@ SET_GLOBL_DEF ERROR   , 1
 
 SET_GLOBL_DEF EMPTY_FILE, 2
 
+SET_GLOBL_DEF NOT_END_OF_TOKEN, 0
+SET_GLOBL_DEF END_OF_TOKEN   , 1
+
+SET_GLOBL_DEF REGULAR_CHAR  , 0
+SET_GLOBL_DEF DELIMITER     , 1
+SET_GLOBL_DEF NEW_LINE      , 2
+SET_GLOBL_DEF COMMENT_START , 3
+SET_GLOBL_DEF FILE_END      , 4

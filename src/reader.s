@@ -24,6 +24,7 @@
 .endm
 
 .section .bss
+
 GLOBL_OBJ input_buffer
 input_buffer:
   .space INPUT_BUFFER_SIZE             # 65536 = INPUT_BUFFER_SIZE
@@ -31,11 +32,12 @@ input_buffer:
 GLOBL_OBJ readen_bytes
 readen_bytes:
   .quad 0
+
 .section .text
 
 GLOBL_FUNC read_from_file
 read_from_file:
-  movq $READ_SYSCALL, %rax
+  movq READ_SYSCALL(%rip), %rax
   movq FILE_DESCRIPTOR(%rip), %rdi
   movq $input_buffer, %rsi
   movq $INPUT_BUFFER_SIZE, %rdx
@@ -49,14 +51,14 @@ read_from_file:
   jmp file_successfully_read
 
 file_is_empty:
-  RET_CODE $EMPTY_FILE
+  RET_CODE EMPTY_FILE(%rip)
   ret
 
 file_unsuccessfully_read:
-  RET_CODE $ERROR
+  RET_CODE ERROR(%rip)
   ret
 
 file_successfully_read:
   movq %rax, readen_bytes(%rip)
-  RET_CODE $NO_ERROR 
+  RET_CODE NO_ERROR(%rip)
   ret

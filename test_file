@@ -1,8 +1,1 @@
-mov rax rax       ; move  rax to rax
-; this is a comment
-
-or rax rax
-al
-r15d
-
-1
+ 
