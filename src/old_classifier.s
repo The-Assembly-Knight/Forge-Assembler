@@ -190,6 +190,3 @@ is_none:
   incq %r12                            # increase the no-type token counter 
   jmp clean_token_registers
 
-
-
-

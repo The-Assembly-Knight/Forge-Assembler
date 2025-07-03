@@ -1,10 +1,7 @@
-.extern DELIMITERS_TABLE 
+.file "scanner.s"
 
+.extern DELIMITERS_TABLE 
 .extern REGULAR_CHAR
-.extern DELIMITER
-.extern NEW_LINE
-.extern COMMENT_START
-.extern FILE_END
 
 .extern END_OF_TOKEN
 .extern NOT_END_OF_TOKEN
@@ -43,10 +40,10 @@ scan_byte:
   leaq DELIMITERS_TABLE(%rip), %rdx    # get delimiters_table
   movzbq (%rdx, %rax, 1), %rdx         # get current char type
 
-  cmpq %rdx, REGULAR_CHAR(%rip)
-  je continue_scanning
+  cmpq REGULAR_CHAR(%rip), %rdx        # if it is a regular char (or a character that comes after a regular char) cont
+  jge continue_scanning
 
-  jmp stop_scanning
+  jnge stop_scanning
 
 stop_scanning:
   RET_CODE END_OF_TOKEN(%rip)

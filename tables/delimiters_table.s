@@ -1,10 +1,21 @@
-# set constants from defs directly in this file:
-
-.set REGULAR_CHAR  , 0
-.set DELIMITER     , 1
-.set NEW_LINE      , 2
-.set COMMENT_START , 3
-.set FILE_END      , 4
+                                       # set constants from defs directly in this file:
+                                       ## Delimiters
+.set WHITE_SPACE       , 1
+.set NEW_LINE          , 2
+.set COMMENT_BEGINNING , 3
+.set FILE_END          , 4
+                                       ## Acceptable characters
+.set REGULAR_CHAR, 100
+.set DIGIT, 101
+                                       ### Prefixes
+.set LOCAL_LABEL_BEGINNING, 102
+.set MEMORY_ACCESS, 104
+.set NUMBER_BEGINNING, 107
+                                       ### Subfixes
+.set LABEL_END, 103
+                                       ### Signs
+.set MEMORY_OFFSET, 105
+.set MEMORY_SCALE, 106
 
 .macro GLOBL_OBJ name                  # declare a global object, including its debugging symbols
   .globl \name
@@ -24,7 +35,7 @@ DELIMITERS_TABLE:
   .byte REGULAR_CHAR                   # 6   - acknowledge
   .byte REGULAR_CHAR                   # 7   - bell, alert
   .byte REGULAR_CHAR                   # 8   - backspace
-  .byte DELIMITER                      # 9   - horizontal tab
+  .byte WHITE_SPACE                    # 9   - horizontal tab
   .byte NEW_LINE                       # 10  - new line
   .byte REGULAR_CHAR                   # 11  - vertical tabulation
   .byte REGULAR_CHAR                   # 12  - form feed
@@ -47,39 +58,39 @@ DELIMITERS_TABLE:
   .byte REGULAR_CHAR                   # 29  - group separator
   .byte REGULAR_CHAR                   # 30  - record separator
   .byte REGULAR_CHAR                   # 31  - unit separator
-  .byte DELIMITER                      # 32  - white space
+  .byte WHITE_SPACE                    # 32  - white space
   .byte REGULAR_CHAR                   # 33  - exclamation mark
   .byte REGULAR_CHAR                   # 34  - double quotes 
-  .byte REGULAR_CHAR                   # 35  - number sign
+  .byte NUMBER_BEGINNING               # 35  - number sign
   .byte REGULAR_CHAR                   # 36  - dollar
   .byte REGULAR_CHAR                   # 37  - per cent sign
   .byte REGULAR_CHAR                   # 38  - ampersand
   .byte REGULAR_CHAR                   # 39  - single quote
   .byte REGULAR_CHAR                   # 40  - open parenthesis
   .byte REGULAR_CHAR                   # 41  - close parenthesis
-  .byte REGULAR_CHAR                   # 42  - asterisk
-  .byte REGULAR_CHAR                   # 43  - plus
+  .byte MEMORY_SCALE                   # 42  - asterisk
+  .byte MEMORY_OFFSET                  # 43  - plus
   .byte REGULAR_CHAR                   # 44  - comma
   .byte REGULAR_CHAR                   # 45  - hyphen-minus
-  .byte REGULAR_CHAR                   # 46  - period/dot
+  .byte LOCAL_LABEL_BEGINNING          # 46  - period/dot
   .byte REGULAR_CHAR                   # 47  - slash
-  .byte REGULAR_CHAR                   # 48  - zero
-  .byte REGULAR_CHAR                   # 49  - one
-  .byte REGULAR_CHAR                   # 50  - two
-  .byte REGULAR_CHAR                   # 51  - three
-  .byte REGULAR_CHAR                   # 52  - four
-  .byte REGULAR_CHAR                   # 53  - five
-  .byte REGULAR_CHAR                   # 54  - six
-  .byte REGULAR_CHAR                   # 55  - seven
-  .byte REGULAR_CHAR                   # 56  - eight
-  .byte REGULAR_CHAR                   # 57  - nine
-  .byte REGULAR_CHAR                   # 58  - colon
-  .byte REGULAR_CHAR                   # 59  - semicolon
+  .byte DIGIT                          # 48  - zero
+  .byte DIGIT                          # 49  - one
+  .byte DIGIT                          # 50  - two
+  .byte DIGIT                          # 51  - three
+  .byte DIGIT                          # 52  - four
+  .byte DIGIT                          # 53  - five
+  .byte DIGIT                          # 54  - six
+  .byte DIGIT                          # 55  - seven
+  .byte DIGIT                          # 56  - eight
+  .byte DIGIT                          # 57  - nine
+  .byte LABEL_END                      # 58  - colon
+  .byte COMMENT_BEGINNING              # 59  - semicolon
   .byte REGULAR_CHAR                   # 60  - less than
   .byte REGULAR_CHAR                   # 61  - equals
   .byte REGULAR_CHAR                   # 62  - greater than
   .byte REGULAR_CHAR                   # 63  - question mark
-  .byte REGULAR_CHAR                   # 64  - at sign
+  .byte MEMORY_ACCESS                  # 64  - at sign
   .byte REGULAR_CHAR                   # 65  - uppercase A
   .byte REGULAR_CHAR                   # 66  - uppercase B
   .byte REGULAR_CHAR                   # 67  - uppercase C
