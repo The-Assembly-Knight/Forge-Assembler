@@ -19,6 +19,7 @@
 
 .extern string1
 .extern string0
+.extern string2
 
 .macro PRINT string
   movq $1, %rax
@@ -59,7 +60,6 @@ close:
 
   jmp exit
 
-
 check_if_end:
   cmpq FILE_END(%rip), %rdx
   je close
@@ -71,6 +71,10 @@ print0:
 
 print1:
   PRINT string1
+  jmp tokenizing_loop
+
+print2:
+  PRINT string2
   jmp tokenizing_loop
 
 error_reading_from_file:

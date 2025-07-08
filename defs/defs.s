@@ -27,8 +27,6 @@ SET_GLOBL_DEF EMPTY_FILE, 2
 SET_GLOBL_DEF NOT_END_OF_TOKEN, 0
 SET_GLOBL_DEF END_OF_TOKEN   , 1
 
-
-
 # More specific byte/char types.
 
 ## Delimiters
@@ -49,14 +47,11 @@ SET_GLOBL_DEF NUMBER_BEGINNING, 107
 ### Subfixes
 SET_GLOBL_DEF LABEL_END, 103
 
-
 ## Concatenative characters
 SET_GLOBL_DEF CONCATENATIVE_CHAR, 200
 SET_GLOBL_DEF PLUS              , 201
 SET_GLOBL_DEF MINUS             , 202
 SET_GLOBL_DEF MULTIPLICATION    , 202
-
-
 
 # Token types
 SET_GLOBL_DEF NONE          , 0

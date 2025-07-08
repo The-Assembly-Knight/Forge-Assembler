@@ -40,15 +40,22 @@ scan_byte:
   leaq DELIMITERS_TABLE(%rip), %rdx    # get delimiters_table
   movzbq (%rdx, %rax, 1), %rdx         # get current char type
 
+  cmpq CONCATENATIVE_CHAR(%rip), %rdx
+  jge concatenative_char_scanned 
+
   cmpq REGULAR_CHAR(%rip), %rdx        # if it is a regular char (or a character that comes after a regular char) cont
-  jge continue_scanning
+  jge regular_char_scanned
 
-  jnge stop_scanning
+  jnge delimiter_char_scanned
 
-stop_scanning:
-  RET_CODE END_OF_TOKEN(%rip)
+concatenative_char_scanned:
+  RET_CODE NOT_END_OF_TOKEN(%rip)
   ret
 
-continue_scanning:
+regular_char_scanned:
   RET_CODE NOT_END_OF_TOKEN(%rip)
+  ret
+
+delimiter_char_scanned:
+  RET_CODE END_OF_TOKEN(%rip)
   ret
