@@ -2,9 +2,11 @@
 
 .extern DELIMITERS_TABLE 
 .extern REGULAR_CHAR
+.extern CONCATENATIVE_CHAR
 
-.extern END_OF_TOKEN
-.extern NOT_END_OF_TOKEN
+.extern FOUND_DELIMITER_CHAR
+.extern FOUND_REGULAR_CHAR
+.extern FOUND_CONCATENATIVE_CHAR
 
 .extern input_buffer
 
@@ -49,13 +51,13 @@ scan_byte:
   jnge delimiter_char_scanned
 
 concatenative_char_scanned:
-  RET_CODE NOT_END_OF_TOKEN(%rip)
+  RET_CODE FOUND_CONCATENATIVE_CHAR(%rip)
   ret
 
 regular_char_scanned:
-  RET_CODE NOT_END_OF_TOKEN(%rip)
+  RET_CODE FOUND_REGULAR_CHAR(%rip)
   ret
 
 delimiter_char_scanned:
-  RET_CODE END_OF_TOKEN(%rip)
+  RET_CODE FOUND_DELIMITER_CHAR(%rip)
   ret

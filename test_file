@@ -1,2 +1,2 @@
-mov @rax rax
+mov @rax+2 rax
 test if

@@ -14,8 +14,13 @@
                                        ### Subfixes
 .set LABEL_END, 103
                                        ### Signs
-.set MEMORY_OFFSET, 105
-.set MEMORY_SCALE, 106
+.set CONCATENATIVE_CHAR, 200
+.set PLUS              , 201
+.set MINUS             , 202
+.set MULTIPLICATION    , 202
+
+
+
 
 .macro GLOBL_OBJ name                  # declare a global object, including its debugging symbols
   .globl \name
@@ -68,10 +73,10 @@ DELIMITERS_TABLE:
   .byte REGULAR_CHAR                   # 39  - single quote
   .byte REGULAR_CHAR                   # 40  - open parenthesis
   .byte REGULAR_CHAR                   # 41  - close parenthesis
-  .byte MEMORY_SCALE                   # 42  - asterisk
-  .byte MEMORY_OFFSET                  # 43  - plus
+  .byte MULTIPLICATION                 # 42  - asterisk
+  .byte PLUS                           # 43  - plus
   .byte REGULAR_CHAR                   # 44  - comma
-  .byte REGULAR_CHAR                   # 45  - hyphen-minus
+  .byte MINUS                          # 45  - hyphen-minus
   .byte LOCAL_LABEL_BEGINNING          # 46  - period/dot
   .byte REGULAR_CHAR                   # 47  - slash
   .byte DIGIT                          # 48  - zero

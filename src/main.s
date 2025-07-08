@@ -14,68 +14,63 @@
 .extern next_byte
 
 .extern FILE_END
-.extern END_OF_TOKEN
-.extern NOT_END_OF_TOKEN
 
-.extern string1
-.extern string0
-.extern string2
+# Byte scanned return types
+.extern FOUND_DELIMITER_CHAR
+.extern FOUND_REGULAR_CHAR
+.extern FOUND_CONCATENATIVE_CHAR
 
-.macro PRINT string
-  movq $1, %rax
-  movq $1, %rdi
-  movq $\string, %rsi
-  movq $2, %rdx
-  
-  syscall
+.extern analyze_regular_byte
+.extern analyze_delimiter_byte
+.extern analyze_concatenative_byte
 
+.macro JUMP_TO_IF_EXIT_CODE_IS label exit_code 
+  cmpq \exit_code, %rax
+  je \label
 .endm
-
-.macro CHECK_EXIT_CODE label adequate_exit_code
-  cmpq \adequate_exit_code, %rax                 # if return code isnt the adequate onen, redirect it to label
+ 
+.macro JUMP_TO_IF_EXIT_CODE_IS_NOT label exit_code 
+  cmpq \exit_code, %rax
   jne \label
 .endm
 
-.section .rodata
 .section .text
 
 .globl _start
 
 _start:
   call open_file
-  CHECK_EXIT_CODE error_exit NO_ERROR(%rip)
+  JUMP_TO_IF_EXIT_CODE_IS_NOT error_exit NO_ERROR(%rip)
  
   call read_from_file
-  CHECK_EXIT_CODE error_reading_from_file NO_ERROR(%rip)
+  JUMP_TO_IF_EXIT_CODE_IS_NOT error_reading_from_file NO_ERROR(%rip)
 
 tokenizing_loop:
   call next_byte
-  CHECK_EXIT_CODE check_if_end NOT_END_OF_TOKEN
-  
-  jmp print1
+  JUMP_TO_IF_EXIT_CODE_IS concatenative FOUND_CONCATENATIVE_CHAR(%rip)
+  JUMP_TO_IF_EXIT_CODE_IS regular       FOUND_REGULAR_CHAR(%rip)
+  JUMP_TO_IF_EXIT_CODE_IS delimiter     FOUND_DELIMITER_CHAR(%rip)
 
 close:
   call close_file
-  CHECK_EXIT_CODE error_exit NO_ERROR(%rip)
+  JUMP_TO_IF_EXIT_CODE_IS_NOT error_exit NO_ERROR(%rip)
 
   jmp exit
 
-check_if_end:
-  cmpq FILE_END(%rip), %rdx
-  je close
-  jne print0
-
-print0:
-  PRINT string0
+concatenative:
+  call analyze_concatenative_byte
   jmp tokenizing_loop
 
-print1:
-  PRINT string1
+regular:
+  call analyze_regular_byte
   jmp tokenizing_loop
 
-print2:
-  PRINT string2
+delimiter:
+  call analyze_delimiter_byte
+  JUMP_TO_IF_EXIT_CODE_IS close FILE_END
+
   jmp tokenizing_loop
+
 
 error_reading_from_file:
   cmpq EMPTY_FILE(%rip), %rax
