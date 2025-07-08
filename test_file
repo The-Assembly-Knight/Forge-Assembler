@@ -1,1 +1,2 @@
-;
+mov @rax rax
+test if

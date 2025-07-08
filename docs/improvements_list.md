@@ -13,6 +13,7 @@
 - [ ] Define a common data struct between the scanner and the classifier to avoid problems related to registers' use.
 - [ ] Extract the use of many labels and jmps into single labels and calls.
 - [ ] Start using macros whenever possible to reduce the amount of repeated code.
+- [ ] Add a new type of character called concatenative character
 
 ## Debugging or bug preventor
 
